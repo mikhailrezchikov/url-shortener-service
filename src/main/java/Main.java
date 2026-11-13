@@ -1,4 +1,4 @@
-import java.awt.*;
+import java.awt.Desktop;
 import java.net.URI;
 import java.util.List;
 import java.util.Scanner;
