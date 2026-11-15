@@ -7,8 +7,8 @@ public class ShortLink {
     private final String shortCode;
     private final UUID ownerId;
     private final LocalDateTime createdAt;
-    private final LocalDateTime expiresAt;
-    private final int maxClicks;
+    private LocalDateTime expiresAt;
+    private int maxClicks;
     private int clickCount;
     private LinkStatus status;
 
@@ -67,6 +67,16 @@ public class ShortLink {
 
         if (clickCount >= maxClicks) {
             status = LinkStatus.LIMIT_REACHED;
+        }
+    }
+
+    public void updateSettings(int maxClicks, int lifetimeHours) {
+        this.maxClicks = maxClicks;
+        this.expiresAt = LocalDateTime.now().plusHours(lifetimeHours);
+
+        if (status == LinkStatus.LIMIT_REACHED
+                && clickCount < maxClicks) {
+            status = LinkStatus.ACTIVE;
         }
     }
 

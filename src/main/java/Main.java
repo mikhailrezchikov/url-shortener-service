@@ -35,7 +35,9 @@ public class Main {
 
                 case 4 -> deleteShortLink();
 
-                case 5 -> switchUser();
+                case 5 -> editShortLink();
+
+                case 6 -> switchUser();
 
                 case 0 -> {
                     System.out.println("До свидания!");
@@ -66,7 +68,8 @@ public class Main {
         System.out.println("2. Мои ссылки");
         System.out.println("3. Перейти по короткой ссылке");
         System.out.println("4. Удалить короткую ссылку");
-        System.out.println("5. Сменить пользователя");
+        System.out.println("5. Изменить параметры ссылки");
+        System.out.println("6. Сменить пользователя");
         System.out.println("0. Выход");
 
         System.out.print("Выберите действие: ");
@@ -256,6 +259,36 @@ public class Main {
                 shortCode,
                 currentUser.getId()
         );
+    }
+
+    private static void editShortLink() {
+
+        if (currentUser == null) {
+            System.out.println("Сначала создайте пользователя!");
+            return;
+        }
+
+        System.out.print("Введите короткий код ссылки: ");
+        String shortCode = scanner.nextLine().trim();
+
+        System.out.print("Введите новый лимит переходов: ");
+        int maxClicks = readInt();
+
+        System.out.print(
+                "Введите новый срок действия в часах с текущего момента: "
+        );
+        int lifetimeHours = readInt();
+
+        try {
+            linkService.updateLinkSettings(
+                    shortCode,
+                    currentUser.getId(),
+                    maxClicks,
+                    lifetimeHours
+            );
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
     }
 
     private static void switchUser() {

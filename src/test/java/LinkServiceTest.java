@@ -146,4 +146,46 @@ class LinkServiceTest {
     void deleteLinkUnknownCodeFails() {
         assertThat(service.deleteLink("unknown", userId)).isFalse();
     }
+
+    @Test
+    @DisplayName("владелец может изменить лимит и срок действия ссылки")
+    void ownerCanUpdateLinkSettings() {
+        ShortLink link = service.createLink(URL, userId, 1);
+        var originalExpiresAt = link.getExpiresAt();
+        service.useLink(link.getShortCode());
+
+        boolean updated = service.updateLinkSettings(
+                link.getShortCode(), userId, 5, 48
+        );
+
+        assertThat(updated).isTrue();
+        assertThat(link.getMaxClicks()).isEqualTo(5);
+        assertThat(link.getExpiresAt()).isAfter(originalExpiresAt);
+        assertThat(link.getStatus()).isEqualTo(LinkStatus.ACTIVE);
+    }
+
+    @Test
+    @DisplayName("чужой пользователь не может изменить параметры ссылки")
+    void nonOwnerCannotUpdateLinkSettings() {
+        ShortLink link = service.createLink(URL, userId, 5);
+
+        boolean updated = service.updateLinkSettings(
+                link.getShortCode(), UUID.randomUUID(), 10, 24
+        );
+
+        assertThat(updated).isFalse();
+        assertThat(link.getMaxClicks()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("новый лимит не может быть меньше уже сделанных переходов")
+    void updateLinkSettingsRejectsLimitBelowClickCount() {
+        ShortLink link = service.createLink(URL, userId, 5);
+        service.useLink(link.getShortCode());
+        service.useLink(link.getShortCode());
+
+        assertThatThrownBy(() -> service.updateLinkSettings(
+                link.getShortCode(), userId, 1, 24
+        )).isInstanceOf(IllegalArgumentException.class);
+    }
 }

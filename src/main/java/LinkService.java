@@ -165,6 +165,48 @@ public class LinkService {
         return true;
     }
 
+    public boolean updateLinkSettings(String shortCode,
+                                      UUID userId,
+                                      int maxClicks,
+                                      int lifetimeHours) {
+
+        ShortLink link = links.get(shortCode);
+
+        if (link == null) {
+            System.out.println("Ссылка не найдена!");
+            return false;
+        }
+
+        if (!link.getOwnerId().equals(userId)) {
+            System.out.println(
+                    "Ошибка! Вы не являетесь владельцем этой ссылки."
+            );
+            return false;
+        }
+
+        if (maxClicks <= 0) {
+            throw new IllegalArgumentException(
+                    "Лимит переходов должен быть больше нуля!"
+            );
+        }
+
+        if (maxClicks < link.getClickCount()) {
+            throw new IllegalArgumentException(
+                    "Новый лимит не может быть меньше числа переходов!"
+            );
+        }
+
+        if (lifetimeHours <= 0) {
+            throw new IllegalArgumentException(
+                    "Срок действия должен быть больше нуля!"
+            );
+        }
+
+        link.updateSettings(maxClicks, lifetimeHours);
+        System.out.println("Параметры ссылки успешно обновлены!");
+        return true;
+    }
+
     public void cleanupExpiredLinks() {
 
         Iterator<Map.Entry<String, ShortLink>> iterator =
